@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * @ClassName: CustomLock
@@ -22,12 +23,22 @@ public class CustomLock implements Lock {
 
     @Override
     public void lock() {
-
+        while (!ref.compareAndSet(null, Thread.currentThread())) {
+            idels.add(Thread.currentThread());
+            LockSupport.park();
+            idels.remove(Thread.currentThread());
+        }
     }
 
     @Override
     public void unlock() {
-
+        while (ref.compareAndSet(Thread.currentThread(), null)) {
+            Object[] objects = idels.toArray();
+            for (Object obj : objects) {
+                Thread thread = (Thread) obj;
+                LockSupport.unpark(thread);
+            }
+        }
     }
 
     @Override
