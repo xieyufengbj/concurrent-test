@@ -1,4 +1,6 @@
-package com.example.forkjoin.sum;
+package com.example.forkjoin;
+
+import com.example.tools.SleepTools;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
@@ -14,8 +16,7 @@ import java.util.concurrent.RecursiveTask;
 public class SumArray {
 
     private static class SumTask extends RecursiveTask<Integer> {
-
-        private final static int THRESHOLD = MakeArray.ARRAY_LENGTH / 10;
+        private final static int THRESHOLD = MakeArray.ARR_LENGTH / 10;
         private int[] src;
         private int fromIndex;
         private int toIndex;
@@ -31,11 +32,13 @@ public class SumArray {
             if (toIndex - fromIndex < THRESHOLD) {
                 int count = 0;
                 for (int i = fromIndex; i <= toIndex; i++) {
-                    count = count + src[i];
+                    // 模拟复杂计算
+                    SleepTools.ns(1);
+                    count += src[i];
                 }
                 return count;
             } else {
-                int mid = (fromIndex + toIndex) / 2;
+                int mid = (toIndex + fromIndex) / 2;
                 SumTask left  = new SumTask(src, fromIndex, mid);
                 SumTask right = new SumTask(src, mid + 1, toIndex);
                 invokeAll(left, right);
@@ -46,17 +49,21 @@ public class SumArray {
 
     public static void main(String[] args) {
         ForkJoinPool pool = new ForkJoinPool();
-        int[] src = MakeArray.makeArr();
-
-        SumTask innerFind = new SumTask(src, 0, src.length - 1);
-
+        int[] src = MakeArray.generate();
         long start = System.currentTimeMillis();
+        // 普通计算
+        long count = 0;
+        for (int i = 0, len = src.length; i < len; i++) {
+            // 模拟复杂计算
+            SleepTools.ns(1);
+            count+= src[i];
+        }
+        System.out.println("count=" + count + "普通计算完成耗时：" + (System.currentTimeMillis() - start) + " ms");
 
+        SumTask task = new SumTask(src, 0, src.length - 1);
+        start = System.currentTimeMillis();
         // 同步调用
-        pool.invoke(innerFind);
-
-        System.out.println("Task is Running ....");
-
-        System.out.println("The count is " + innerFind.join() + " spend time:" + (System.currentTimeMillis() - start) + "ms");
+        pool.invoke(task);
+        System.out.println("count="+ task.join() +" fork-join完成计算耗时：" + (System.currentTimeMillis() - start) + " ms");
     }
 }

@@ -30,4 +30,16 @@ public class SleepTools {
         } catch (InterruptedException e) {
         }
     }
+
+    /**
+     * 按纳秒数休眠
+     * @param seconds
+     */
+    public static final void ns(int seconds) {
+        try {
+            TimeUnit.NANOSECONDS.sleep(seconds);
+        } catch (InterruptedException e) {
+
+        }
+    }
 }
