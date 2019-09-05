@@ -40,6 +40,10 @@ public class FutureTest {
 
         UseCallable useCallable = new UseCallable();
 
+        /**
+         * FutureTask是Future的实现类，它实现了两个接口，Runnable和Future，它可以作为Runnable被执行，也可以得到Future的返回值，
+         * 这是异步加载的好处。
+         */
         FutureTask<Integer> futureTask = new FutureTask<Integer>(useCallable);
 
         new Thread(futureTask).start();
@@ -47,6 +51,9 @@ public class FutureTest {
         Random random = new Random();
         SleepTools.second(1);
         if (random.nextBoolean()) {
+            /**
+             * get：获取执行结果，在这个过程中线程会一直阻塞，直到任务执行完毕，如果在此过程中，线程被中断直接抛出异常；
+             */
             System.out.println("Get UserCallable result = " + futureTask.get());
         } else {
             System.out.println("中断计算");
