@@ -14,6 +14,10 @@ public class CountDownLatchTest {
 
     static CountDownLatch latch = new CountDownLatch(6);
 
+    private static final int nums = 1000;
+
+    private static CountDownLatch countDownLatch = new CountDownLatch(nums);
+
     /**
      * 初始化线程
      */
@@ -53,7 +57,7 @@ public class CountDownLatchTest {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main1(String[] args) throws InterruptedException {
 
         // 单独的初始化线程，初始化分为2步，需要扣减2次
         new Thread(
@@ -87,5 +91,27 @@ public class CountDownLatchTest {
         }
         latch.await();
         System.out.println("Main do ites work ...");
+    }
+
+    public static void main(String[] args) {
+       for (int i = 0; i < nums; i++) {
+           Thread thread = new Thread(() -> {
+               try {
+                   countDownLatch.await();
+                   // 具体业务测试逻辑
+                   System.out.println("测试结果：" + System.currentTimeMillis());
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               }
+           });
+           thread.start();
+           // 每个线程执行扣减一次
+           countDownLatch.countDown();
+       }
+        try {
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
